@@ -1,0 +1,41 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form action="" id="renderIo">
+      <input type="text" id="title" />
+      <label for="name">name:</label>
+      <input type="text" id="price" />
+      <label for="price">price:</label>
+      <input type="text" name="" id="stock" />
+      <label for="">stock:</label>
+      <input type="text" id="thumbnail" />
+      <label for="">thumbnail:</label>
+      <input type="text" id="code" />
+      <label for="code">code:</label>
+      <input type="text" id="description" />
+      <label for="description">description:</label>
+      <button
+        type="submit
+      "
+      >Enviar</button>
+    </form>
+    {{{body}}}
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const form = document.getElementById("renderIo") const socket = io();
+      form.addEventListener("submit", async(e)=>{e.preventDefault() const
+      product = {"title": e.target.title.value, "name": e.target.name.value,
+      "price": e.target.price.value, "stock": e.target.stock.value, "thumbnail":
+      e.target.thumbnail.value, "code": e.target.code.value, "description":
+      e.target.description.value} }) socket.on("productCreated", (html)=>{
+      document.querySelector("html").innerHTML=html })
+
+    </script>
+  </body>
+
+</html>

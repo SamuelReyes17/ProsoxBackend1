@@ -1,14 +1,53 @@
 import express, { json } from "express";
 //import { productsArr, cartsArr } from "./data.js";
-import cartsArr from "./carts.json" assert { type: "json" };
-import productsArr from "./products.json" assert { type: "json" };
-import path from "path";
+//import cartsArr from "./carts.json" assert { type: "json" };
+//import productsArr from "./products.json" assert { type: "json" };
+import path, { dirname } from "path";
 import { writeFile } from "fs/promises";
+import { readFileSync } from "fs";
+import http from "node:http";
+import { Server } from "socket.io";
+import { fileURLToPath } from "url";
+import { engine } from "express-handlebars";
+import router from "./src/router/router.js";
+import cartRouter from "./src/router/cartsRouter.js";
 
-const server = express();
+const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const httpServer = http.createServer(app);
+export const io = new Server(httpServer);
 
-let products = productsArr.products;
-let carts = cartsArr.carts;
+app.use(express.static(path.join(__dirname, "/public")));
+app.use(express.json());
+let messages = [];
+
+//Implementacion socket io
+
+io.on("connection", (socket) => {
+  console.log("cliente conectado", socket.id);
+});
+
+//HandleBars
+
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
+app.set("views", import.meta.dirname + "/src/views");
+
+app.use(router);
+app.use(cartRouter);
+
+httpServer.listen(3000, () => {
+  console.log("Servidor esta levantado");
+});
+/*
+let products = JSON.parse(
+  readFileSync("./products.json", { encoding: "utf-8" })
+).products;
+
+let carts = JSON.parse(
+  readFileSync("./carts.json", { encoding: "utf-8" })
+).carts;
 
 server.use(express.json());
 
@@ -17,38 +56,7 @@ server.get("/api", (req, res) => {
     "Bienvenidos a mi API, utilizar la ruta /api/products para hacer peticiones"
   );
 });
-// Ruta de Productos
-server.get("/api/products", (req, res) => {
-  res.json(products);
-});
 
-// Post products
-let idCounter = 0;
-server.post("/api/products", async (req, res) => {
-  const { title, price, stock, category, description, code, thumbnail } =
-    req.body;
-  const newProduct = {
-    id: idCounter++,
-    title,
-    price,
-    code,
-    stock,
-    thumbnail,
-    category,
-    description,
-  };
-  products.push(newProduct);
-  await writeFile("./products.json", JSON.stringify({ products }));
-  res.json({ message: "Producto creado con exito" });
-});
-
-// Obtener products
-server.get("/api/products/:id", (req, res) => {
-  const product = products.find((p) => p.id === Number(req.params.id));
-  if (!product)
-    return res.status(404).json({ error: "Producto no encontrado" });
-  res.json(product);
-});
 
 // Put products
 server.put("/api/products/:id", (req, res) => {
@@ -126,6 +134,6 @@ server.post("/api/carts/:cid/products/:pid", async (req, res) => {
   await writeFile("./carts.json", JSON.stringify({ carts }));
   res.json({ message: "Se agrego prodcuto al carrito" });
 });
-server.listen(8080, () => {
-  console.log("Servidor Levantado");
-});
+/*server.listen(8080, () => {
+  console.log("Servidor Levantado000");
+});*/
